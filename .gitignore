@@ -56,3 +56,6 @@ Source/BetterAnimalsTab/obj/Debug/BetterAnimalsTab.pdb
 /Source/ModConfig.json
 /.mailmap
 /Source/SteamConfig.vdf
+
+# VS Code
+.mono/*

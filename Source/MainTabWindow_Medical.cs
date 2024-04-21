@@ -10,8 +10,10 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Fluffy {
-    public enum SourceType {
+namespace Fluffy
+{
+    public enum SourceType
+    {
         Colonists,
         Animals,
         Prisoners,
@@ -19,7 +21,8 @@ namespace Fluffy {
         Hostiles
     }
 
-    public class MainTabWindow_Medical: MainTabWindow_PawnTable {
+    public class MainTabWindow_Medical : MainTabWindow_PawnTable
+    {
         #region Fields
 
         private static readonly FieldInfo _tableFieldInfo;
@@ -30,15 +33,18 @@ namespace Fluffy {
 
         #region Constructors
 
-        static MainTabWindow_Medical() {
+        static MainTabWindow_Medical()
+        {
             _tableFieldInfo = typeof(MainTabWindow_PawnTable).GetField("table",
                 BindingFlags.Instance | BindingFlags.NonPublic);
-            if (_tableFieldInfo == null) {
+            if (_tableFieldInfo == null)
+            {
                 throw new NullReferenceException("table field not found!");
             }
         }
 
-        public MainTabWindow_Medical() {
+        public MainTabWindow_Medical()
+        {
             Instance = this;
         }
 
@@ -48,23 +54,29 @@ namespace Fluffy {
 
         public static MainTabWindow_Medical Instance { get; private set; }
 
-        public SourceType Source {
+        public SourceType Source
+        {
             get => _source;
-            private set {
+            private set
+            {
                 _source = value;
                 RebuildTable();
             }
         }
 
-        public PawnTable Table {
+        public PawnTable Table
+        {
             get => _tableFieldInfo.GetValue(this) as PawnTable_PlayerPawns;
             private set => _tableFieldInfo.SetValue(this, value);
         }
 
-        public static bool FilterHealthy {
+        public static bool FilterHealthy
+        {
             get => _filterHealthy;
-            set {
-                if (_filterHealthy == value) {
+            set
+            {
+                if (_filterHealthy == value)
+                {
                     return;
                 }
 
@@ -73,11 +85,14 @@ namespace Fluffy {
             }
         }
 
-        protected override IEnumerable<Pawn> Pawns {
-            get {
+        protected override IEnumerable<Pawn> Pawns
+        {
+            get
+            {
                 IEnumerable<Pawn> pawns;
 
-                switch (Source) {
+                switch (Source)
+                {
                     case SourceType.Colonists:
                         pawns = Find.CurrentMap.mapPawns.FreeColonists;
                         break;
@@ -118,7 +133,8 @@ namespace Fluffy {
                         break;
                 }
 
-                if (_filterHealthy) {
+                if (_filterHealthy)
+                {
                     pawns = pawns.Where(p => !p.IsHealthy());
                 }
 
@@ -132,14 +148,18 @@ namespace Fluffy {
 
         #region Methods
 
-        public void DoSourceSelectionButton(Rect rect) {
+        public void DoSourceSelectionButton(Rect rect)
+        {
             // apparently, font size going to tiny on fully zooming in is working as designed...
             Text.Font = GameFont.Small;
-            if (Widgets.ButtonText(rect, Source.ToString().Translate())) {
+            if (Widgets.ButtonText(rect, Source.ToString().Translate()))
+            {
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
 
-                foreach (SourceType sourceOption in Enum.GetValues(typeof(SourceType)).OfType<SourceType>()) {
-                    if (sourceOption != Source) {
+                foreach (SourceType sourceOption in Enum.GetValues(typeof(SourceType)).OfType<SourceType>())
+                {
+                    if (sourceOption != Source)
+                    {
                         options.Add(new FloatMenuOption(sourceOption.ToString().Translate(),
                             delegate { Source = sourceOption; }));
                     }
@@ -149,24 +169,29 @@ namespace Fluffy {
             }
         }
 
-        public void DoFilterHealthyButton(Rect rect) {
+        public void DoFilterHealthyButton(Rect rect)
+        {
             TooltipHandler.TipRegion(rect,
                 FilterHealthy ? "MedicalTab.FilterHealthyOn".Translate() : "MedicalTab.FilterHealthyOff".Translate());
             if (Widgets.ButtonImage(rect, FilterHealthy ? Resources.HealthyFilterOn : Resources.HealthyFilterOff, FilterHealthy ? GenUI.MouseoverColor : Color.white,
-                FilterHealthy ? Color.white : GenUI.MouseoverColor)) {
+                FilterHealthy ? Color.white : GenUI.MouseoverColor))
+            {
                 FilterHealthy = !FilterHealthy;
             }
         }
 
-        public override void DoWindowContents(Rect rect) {
+        public override void DoWindowContents(Rect rect)
+        {
             DoSourceSelectionButton(new Rect(rect.xMin, rect.yMin, 120f, 30f));
             DoFilterHealthyButton(new Rect(rect.xMin + 120f + 6f, rect.yMin, 30f, 30f));
+            rect.y += 20;
             base.DoWindowContents(rect);
         }
 
-        private void RebuildTable() {
+        private void RebuildTable()
+        {
             DynamicPawnTableDefOf.Medical.Select(c => (c.Worker as IOptionalColumn)?.ShowFor(Source) ?? true);
-            Table = new PawnTable_PlayerPawns(DynamicPawnTableDefOf.Medical, () => Pawns, UI.screenWidth - (int) (Margin * 2f), (int) (UI.screenHeight - 35 - ExtraBottomSpace - ExtraTopSpace - (Margin * 2f)));
+            Table = new PawnTable_PlayerPawns(DynamicPawnTableDefOf.Medical, () => Pawns, UI.screenWidth - (int)(Margin * 2f), (int)(UI.screenHeight - ExtraBottomSpace - ExtraTopSpace - (Margin * 2f)));
         }
 
         #endregion Methods
